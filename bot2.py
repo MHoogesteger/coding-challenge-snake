@@ -1,4 +1,4 @@
-from random import choice
+import random
 from typing import List, Tuple
 
 import numpy as np
@@ -10,7 +10,7 @@ from ...snake import Snake
 import matplotlib.pyplot as plt
 
 from .GameState import GameState
-from .navigationfunctions import a_star, straightest_to_target, determine_move_from_position, flood_count, determine_position_from_move, choose_largest_gap
+from .navigationfunctions import a_star, straightest_to_target, determine_move_from_position, flood_count, determine_position_from_move, choose_largest_gap, update_strategy
 
 DEBUG = False
 np.set_printoptions(threshold=np.inf)
@@ -62,17 +62,20 @@ def compose_grid(grid_size,snake, other_snakes,):
     return 0
 
 
-class CherriesAreForLosers(Bot):
+class ThereIsNoCandy(Bot):
     """
-    Moves randomly, but makes sure it doesn't collide with other snakes
+    Moves semi-randomly, but makes sure it doesn't collide with other snakes
     """
     def __init__(self, id: int, grid_size: Tuple[int, int]):
         super().__init__(id, grid_size)
+        # Initialize the game state with empty grids
         self.game_state = GameState(grid_size)
+        # Set initial targeted candy to None
+        self.candy_pos = None
 
     @property
     def name(self):
-        return 'Cherries are for Losers'
+        return 'There is no Candy!'
 
     @property
     def contributor(self):
@@ -81,15 +84,8 @@ class CherriesAreForLosers(Bot):
 
     def determine_next_move(self, snake: Snake, other_snakes: List[Snake], candies: List[np.array]) -> Move:
         g = self.game_state
-        g.update_state_after_round(snake, other_snakes, candies)
-        # plot_arena(snake, other_snakes, candies, self.grid_size)
-        # compose_grid(self.grid_size, snake, other_snakes)
-        if DEBUG:
-            # input('ctd...')
-            g.print_arena()
-            g.print_snake_length_arena()
-            g.print_grids()
-
+        g.update_state_after_round(snake, other_snakes, candies, random)
+        
         if len(snake.positions) > len(other_snakes[0].positions)*2:
             crudelogger("Suicide!")
             return self.suicide(snake)
@@ -103,18 +99,29 @@ class CherriesAreForLosers(Bot):
         crudelogger(f" Empty spaces: {nempty}")
         if path is None or len(path) < 2:
             crudelogger("No path found, going into panick mode")
-            return choose_largest_gap(w, head, nonlethal_moves, None)
+            return choose_largest_gap(w, head, nonlethal_moves, g.grid_space)
         else:
             crudelogger(path)
             move =  determine_move_from_position(head, path[1])
-            if flood_count(w, determine_position_from_move(head,move), None) < nempty/3:
-                move = choose_largest_gap(w, head, nonlethal_moves, None)
+            if flood_count(w, determine_position_from_move(head,move),g.grid_space) < nempty/3:
+                move = choose_largest_gap(w, head, nonlethal_moves, g.grid_space)
                 crudelogger(f"Overriding A-star! ")
 
-        
-        crudelogger(f" Flood: {flood_count(w,determine_position_from_move(head,move), None)}")
+        if self._will_eat(head, move, candies):
+            update_strategy(g.grid_space, self.grid_size, candies, determine_position_from_move(head, move), snake, other_snakes)
+
+        if DEBUG:
+            crudelogger(f" Flood: {flood_count(w,determine_position_from_move(head,move),g.grid_space)}")
 
         return move
+    
+    def _will_eat(self, head, move, candies):
+        new_pos = determine_position_from_move(head, move)
+        for candy in candies:
+            if new_pos[0] == candy[0] and new_pos[1] == candy[1]:
+                crudelogger(f"Will eat candy at {candy}")
+                return True
+        return False
 
     def _determine_possible_moves(self, snake, other_snake) -> List[Move]:
         """
