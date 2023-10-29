@@ -179,27 +179,27 @@ def determine_position_from_move(position, move):
 
 def update_strategy(policy, grid_size, candies, position, snake, other_snakes):
     found_optimal_path = False
-
-    count = 0
-    dist = 1
-    obstacles = []
-    for candy in candies:
-        if position[0]!=candy[0] or position[1]!=candy[1]:
-            obstacles.append(candy)
-    
-    while not found_optimal_path:
-        count += 1
-        optimal_path = policy.evaluate()
-        (direction,distance) = get_shortest_path_on_grid(policy,obstacles, grid_size, other_snakes[0][0])
-        manh_dist = abs(position[0]-direction) + abs(position[1]-distance)
-        manh_dist_other = abs(other_snakes[0][0][0]-direction) + abs(other_snakes[0][0][1]-distance)
-        if manh_dist <= dist and manh_dist > 0 and not collides((direction,distance), [snake, other_snakes[0]]) and manh_dist_other > manh_dist:
-            found_optimal_path = True
-        if count % 1000 == 0:
-            dist += 1
-        if count > 10000:
-            found_optimal_path = True
-    policy.update(optimal_path)
+    if policy is not None:
+        count = 0
+        dist = 1
+        obstacles = []
+        for candy in candies:
+            if position[0]!=candy[0] or position[1]!=candy[1]:
+                obstacles.append(candy)
+        
+        while not found_optimal_path:
+            count += 1
+            optimal_path = policy.evaluate()
+            (direction,distance) = get_shortest_path_on_grid(policy,obstacles, grid_size, other_snakes[0][0])
+            manh_dist = abs(position[0]-direction) + abs(position[1]-distance)
+            manh_dist_other = abs(other_snakes[0][0][0]-direction) + abs(other_snakes[0][0][1]-distance)
+            if manh_dist <= dist and manh_dist > 0 and not collides((direction,distance), [snake, other_snakes[0]]) and manh_dist_other > manh_dist:
+                found_optimal_path = True
+            if count % 1000 == 0:
+                dist += 1
+            if count > 10000:
+                found_optimal_path = True
+        policy.update(optimal_path)
 
 def get_shortest_path_on_grid(policy,obstacles, grid_size, target):
     """Gets the shortest path on the grid to a candy"""

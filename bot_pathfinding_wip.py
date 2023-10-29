@@ -99,19 +99,19 @@ class ThereIsNoCandy(Bot):
         crudelogger(f" Empty spaces: {nempty}")
         if path is None or len(path) < 2:
             crudelogger("No path found, going into panick mode")
-            return choose_largest_gap(w, head, nonlethal_moves, g.grid_space)
+            return choose_largest_gap(w, head, nonlethal_moves, g.grid_traversal)
         else:
             crudelogger(path)
             move =  determine_move_from_position(head, path[1])
-            if flood_count(w, determine_position_from_move(head,move),g.grid_space) < nempty/3:
-                move = choose_largest_gap(w, head, nonlethal_moves, g.grid_space)
+            if flood_count(w, determine_position_from_move(head,move),g.grid_traversal) < nempty/3:
+                move = choose_largest_gap(w, head, nonlethal_moves, g.grid_traversal)
                 crudelogger(f"Overriding A-star! ")
 
         if self._will_eat(head, move, candies):
-            update_strategy(g.grid_space, self.grid_size, candies, determine_position_from_move(head, move), snake, other_snakes)
+            update_strategy(g.grid_traversal, self.grid_size, candies, determine_position_from_move(head, move), snake, other_snakes)
 
         if DEBUG:
-            crudelogger(f" Flood: {flood_count(w,determine_position_from_move(head,move),g.grid_space)}")
+            crudelogger(f" Flood: {flood_count(w,determine_position_from_move(head,move),g.grid_traversal)}")
 
         return move
     

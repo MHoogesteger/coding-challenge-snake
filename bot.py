@@ -81,7 +81,7 @@ class CherriesAreForLosers(Bot):
 
     def determine_next_move(self, snake: Snake, other_snakes: List[Snake], candies: List[np.array]) -> Move:
         g = self.game_state
-        g.update_state_after_round(snake, other_snakes, candies)
+        g.update_state_after_round(snake, other_snakes, candies, None)
         # plot_arena(snake, other_snakes, candies, self.grid_size)
         # compose_grid(self.grid_size, snake, other_snakes)
         if DEBUG:

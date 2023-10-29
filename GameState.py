@@ -43,7 +43,7 @@ class GameState:
         self.grid_size = grid_size
         self.grids = None
         self.initialized = False
-        self.grid_space = None
+        self.grid_traversal = None
 
     def initialize_state(self, snake: Snake, other_snakes: List[Snake], candies: List[np.array]):
         """
@@ -123,7 +123,8 @@ class GameState:
         for candy in self.candies:
             self.get_candy_grid()[candy[0], candy[1]] = 1
 
-        _, self.grid_space = self.sort_state(self.grids,order)
+        if order is not None:
+            _, self.grid_traversal = self.sort_state(self.grids,order)
 
         self.get_occupied_grid()[:] = np.any(self.grids[:, :, (SNAKE_START_ID + BODYGRID_ID):(SNAKE_START_ID+BODYGRID_ID+SNAKEMULTIPLIER*self.num_other_snakes+1):SNAKEMULTIPLIER], axis=2)
     
