@@ -79,7 +79,7 @@ class ThereIsNoCandy(Bot):
 
     @property
     def contributor(self):
-        return 'Rinus'
+        return 'TheOracle'
     
 
     def determine_next_move(self, snake: Snake, other_snakes: List[Snake], candies: List[np.array]) -> Move:
